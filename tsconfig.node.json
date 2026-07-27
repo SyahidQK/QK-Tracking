@@ -1,0 +1,5 @@
+{
+  "//": "Unused. vite.config.ts is typechecked by the root tsconfig.json, which includes it and pulls in @types/node. Kept only so editors that look for this file by convention don't complain; safe to delete.",
+  "extends": "./tsconfig.json",
+  "include": ["vite.config.ts"]
+}
