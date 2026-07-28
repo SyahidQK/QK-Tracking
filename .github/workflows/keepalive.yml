@@ -1,0 +1,50 @@
+# Keeps the Supabase project out of the free-plan inactivity pause.
+#
+# Supabase pauses Free projects that see "too few user queries" over 7 days;
+# their guidance is that a few database requests per day is enough. This sends
+# three harmless reads each morning from GitHub's runners — genuinely external
+# traffic, unlike the reminder cron, which is the project calling itself.
+#
+# Nothing is written. No dummy records, no sequence numbers consumed.
+#
+# The key below is the PUBLISHABLE (anon) key. It is already embedded in the
+# frontend bundle that every visitor downloads, so it is not a secret. RLS
+# means an unauthenticated caller reads nothing back — the request still
+# reaches the database, which is all that matters here.
+
+name: Supabase keepalive
+
+on:
+  schedule:
+    # 23:30 UTC = 07:30 Malaysia time, daily.
+    - cron: '30 23 * * *'
+  # Lets you trigger it by hand from the Actions tab to verify it works.
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: https://mhxkxuczgybdoiglodvu.supabase.co
+          ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oeGt4dWN6Z3liZG9pZ2xvZHZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NDU1ODYsImV4cCI6MjEwMDUyMTU4Nn0.PXCMqW-kunw6VY8HPri9GP8l9gY-DPg0OG_lYyfXVig
+        run: |
+          set -e
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" \
+              "$SUPABASE_URL/rest/v1/departments?select=name&limit=1" \
+              -H "apikey: $ANON_KEY" \
+              -H "Authorization: Bearer $ANON_KEY")
+
+            echo "ping $i -> HTTP $code"
+
+            # 200 is the expected result. 401/404 would mean the project moved
+            # or the key rotated; fail loudly so this doesn't rot silently.
+            if [ "$code" != "200" ]; then
+              echo "::error::Unexpected status $code from Supabase. The project may be paused, or the key/URL may have changed."
+              exit 1
+            fi
+            sleep 5
+          done
+          echo "Supabase project is awake."
