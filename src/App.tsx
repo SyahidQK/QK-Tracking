@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { AuthProvider, useAuth } from '@/hooks/useAuth'
 import { Layout } from '@/components/Layout'
 import { Alert, Button, Spinner } from '@/components/ui'
+import { configError } from '@/lib/supabase'
 
 import Login from '@/pages/Login'
 import AuthCallback from '@/pages/AuthCallback'
@@ -70,7 +71,63 @@ function NotFound() {
   )
 }
 
+/**
+ * Shown when the build has no Supabase credentials. Without this the app
+ * renders nothing at all, which looks like a broken deploy rather than a
+ * missing setting.
+ */
+function ConfigurationError() {
+  return (
+    <div className="flex min-h-dvh items-center justify-center bg-slate-50 p-6">
+      <div className="w-full max-w-lg">
+        <div className="mb-6 flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
+            QK
+          </span>
+          <span className="font-semibold tracking-tight text-slate-900">Equipment Tracking</span>
+        </div>
+
+        <Alert tone="error" title="This deployment is not configured yet">
+          <p className="mt-1">
+            The app was built without its Supabase credentials, so it cannot connect to the
+            database.
+          </p>
+        </Alert>
+
+        <div className="mt-5 rounded-xl border border-slate-200 bg-white p-5 text-sm">
+          <p className="font-medium text-slate-900">To fix it</p>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-slate-600">
+            <li>
+              In your hosting provider&apos;s settings, add the environment variables{' '}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">VITE_SUPABASE_URL</code>{' '}
+              and{' '}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">
+                VITE_SUPABASE_ANON_KEY
+              </code>
+              .
+            </li>
+            <li>
+              <span className="font-medium text-slate-900">Redeploy.</span> These values are baked in
+              when the app is built, so adding them alone changes nothing until there is a fresh
+              build.
+            </li>
+          </ol>
+          <p className="mt-4 text-slate-500">
+            Running locally? Copy <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">
+              .env.example
+            </code>{' '}
+            to <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">.env</code>, then restart
+            the dev server. See SETUP.md.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
+  if (configError) return <ConfigurationError />
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
