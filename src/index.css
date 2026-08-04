@@ -34,4 +34,54 @@
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
   }
+
+  /*
+   * Expanding ring pulse on hover.
+   *
+   * The original uses transform: scale(1.4), which grows the ring in
+   * PROPORTION to the element. That reads well on a small pill, but this app
+   * has full-width buttons — a 340px button would throw the ring 68px out
+   * either side and look like a glitch. box-shadow spread expands by a fixed
+   * pixel amount instead, so the ring looks identical on a 90px "Cancel" and
+   * a full-width "Yes, I have returned this equipment".
+   *
+   * --btn-ring is set per variant on the button itself; currentColor is the
+   * fallback.
+   */
+  .btn-pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    /* Must not swallow clicks meant for the button underneath. */
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /*
+   * hover:hover excludes touchscreens, where a tap leaves the element stuck
+   * in :hover and the ring would pulse indefinitely after the press.
+   */
+  @media (hover: hover) and (pointer: fine) {
+    .btn-pulse:not(:disabled):hover::after {
+      animation: btn-ring 1.2s ease-out infinite;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-pulse:hover::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes btn-ring {
+  0% {
+    box-shadow: 0 0 0 0 var(--btn-ring, currentColor);
+    opacity: 0.55;
+  }
+  100% {
+    box-shadow: 0 0 0 9px var(--btn-ring, currentColor);
+    opacity: 0;
+  }
 }

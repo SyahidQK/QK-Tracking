@@ -19,12 +19,17 @@ import { cn } from '@/lib/utils'
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
+// --btn-ring sets the pulse colour per variant (see .btn-pulse in index.css).
+// currentColor would make the ring white on the filled variants, which is
+// invisible against the app's light background.
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-sm',
-  secondary: 'bg-white text-slate-800 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 shadow-sm',
-  ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-  danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
-  success: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm',
+  primary:
+    'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-sm [--btn-ring:#3366f5]',
+  secondary:
+    'bg-white text-slate-800 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 shadow-sm [--btn-ring:#94a3b8]',
+  ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 [--btn-ring:#94a3b8]',
+  danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm [--btn-ring:#ef4444]',
+  success: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm [--btn-ring:#10b981]',
 }
 
 const BUTTON_SIZES: Record<ButtonSize, string> = {
@@ -48,7 +53,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        'focus-ring inline-flex items-center justify-center rounded-lg font-medium transition-colors',
+        'focus-ring btn-pulse relative inline-flex items-center justify-center rounded-lg font-medium transition-colors',
         'disabled:pointer-events-none disabled:opacity-50',
         BUTTON_VARIANTS[variant],
         BUTTON_SIZES[size],
