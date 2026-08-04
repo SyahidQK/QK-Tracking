@@ -211,8 +211,8 @@ export default function RecordDetail() {
               files={files}
               onChange={setFiles}
               disabled={submitting}
-              label="Return proof photo"
-              hint="A photo of the equipment back in place."
+              label="Return proof photo (required)"
+              hint="A photo of the equipment back in place. Required before you can confirm."
             />
 
             <div>
@@ -241,6 +241,13 @@ export default function RecordDetail() {
               />
             )}
 
+            {/* Same rule as the emailed return page: no photo, no submit. */}
+            {files.length === 0 && (
+              <p id="record-photo-required" className="text-sm text-slate-500">
+                Attach a return proof photo above to continue.
+              </p>
+            )}
+
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 variant="secondary"
@@ -253,7 +260,13 @@ export default function RecordDetail() {
               >
                 Cancel
               </Button>
-              <Button variant="success" onClick={handleReturn} loading={submitting}>
+              <Button
+                variant="success"
+                onClick={handleReturn}
+                loading={submitting}
+                disabled={files.length === 0}
+                aria-describedby={files.length === 0 ? 'record-photo-required' : undefined}
+              >
                 <CheckCircle2 className="h-4 w-4" aria-hidden />
                 {submitting ? 'Recording…' : 'Yes, I have returned this'}
               </Button>

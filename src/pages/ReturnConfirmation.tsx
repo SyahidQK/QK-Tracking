@@ -239,8 +239,8 @@ export default function ReturnConfirmation() {
               files={files}
               onChange={setFiles}
               disabled={submitting}
-              label="Return proof photo"
-              hint="A photo of the equipment back in place. Required."
+              label="Return proof photo (required)"
+              hint="A photo of the equipment back in place. Required before you can confirm."
             />
 
             <div>
@@ -269,16 +269,36 @@ export default function ReturnConfirmation() {
               />
             )}
 
-            <Button
-              size="lg"
-              variant="success"
-              onClick={handleSubmit}
-              loading={submitting}
-              className="w-full"
-            >
-              <PackageCheck className="h-5 w-5" aria-hidden />
-              {submitting ? 'Recording…' : 'Yes, I have returned this equipment'}
-            </Button>
+            {/*
+              Disabled until a photo is attached. The server enforces this too
+              (redeem_return_token refuses with NO_PROOF), but blocking the
+              button is clearer than letting someone press it and bounce off an
+              error. aria-describedby carries the reason to screen readers,
+              which otherwise get a disabled control with no explanation.
+            */}
+            <div>
+              <Button
+                size="lg"
+                variant="success"
+                onClick={handleSubmit}
+                loading={submitting}
+                disabled={files.length === 0}
+                aria-describedby={files.length === 0 ? 'return-photo-required' : undefined}
+                className="w-full"
+              >
+                <PackageCheck className="h-5 w-5" aria-hidden />
+                {submitting ? 'Recording…' : 'Yes, I have returned this equipment'}
+              </Button>
+
+              {files.length === 0 && (
+                <p
+                  id="return-photo-required"
+                  className="mt-2 text-center text-sm text-slate-500"
+                >
+                  Attach a return proof photo above to continue.
+                </p>
+              )}
+            </div>
           </CardBody>
         </Card>
       </div>
